@@ -1,0 +1,8 @@
+articulos=[ {nombre, cantidad, valorunitario, fecha,id}]
+------agregar-editar-eliminar-listar-todos los articulos-buscar uno en particular     
+
+personas [{nombre, password, email, telefono}]
+-----agregar-editar-eliminar-listar-todos los articulos-buscar uno en particular     
+
+carrito=[{idarticulo,precio,cantidad,fecha,email}]
+------agregar-eliminar-editar cantidad-subtotal-total-promedio-calculariva(19)-listar-listar email
