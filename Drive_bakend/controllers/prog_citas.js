@@ -1,4 +1,4 @@
-import CitasModel from "../models/citas.js"
+import CitasModel from "../models/prog_citas.js"
 
     const httpCitas = {
         getCitas: async (req, res) => {

@@ -12,7 +12,7 @@
         <div class="card">
           <div class="top-half">
             <div class="info">
-              <p><strong>Código:</strong> {{ ambiente.codigo }}</p>
+              <p><strong>Cedula:</strong> {{ ambiente.codigo }}</p>
               <p><strong>Nombre:</strong> {{ ambiente.nombre }}</p>
               <p><strong>Tipo:</strong> {{ ambiente.tipo }}</p>
             </div>
@@ -75,7 +75,7 @@
           </q-card-section>
           <q-card-section>
             <q-btn @click="showModalAgregar = false" label="Cancelar" />
-            <q-btn @click="agregarAmbiente()" color="primary" label="Agregar" />
+            <q-btn @click="agregarCita()" color="primary" label="Agregar" />
           </q-card-section>
         </q-card>
       </q-dialog>
@@ -130,7 +130,7 @@ let IdCentroFormacion = ref("");
 const archivoOEnlace = ref("");
 const loading = ref(false);
 
-async function agregarAmbiente() {
+async function agregarCita() {
   loading.value = true;
   let r = await StoreAmbiente.addAmbientesFormacion({
     nombre: Nombre.value,

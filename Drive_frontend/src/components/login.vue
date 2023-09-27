@@ -160,6 +160,8 @@
 import { ref, onMounted } from 'vue'
 import { useLoginStore } from '../stores/login.js';
 import { useRouter } from "vue-router";
+import axios from 'axios';
+
 const useLogin = useLoginStore();
 let router = useRouter();
 let ingresaCorreo = ref(false);
@@ -183,18 +185,6 @@ function comprovar() {
     compruevaCorreo.value = true
 }
 
-/* async function validar() {
-    console.log("hola estoy en validar");
-    let r = await useLogin.validar(cedula, password).then((res) => {
-        console.log(r);
-        if (res.status == 200) {
-            console.log("sesion exitosa");
-            router.push("/home");
-        } else if (res.status == 500) {
-            check.value = "Error al iniciar sesion"
-        }
-    })
-} */
 
 async function pruebaLogin() {
     try {
@@ -215,34 +205,6 @@ async function pruebaLogin() {
     loading.value = false
 }
 
-function ingresar() {
-
-
-}
-
-// function Ingresar() {
-//     console.log("hola");
-//     if (rol.value === "") {
-//         check.value = "Debes seleccionar tu rol"
-//     } else if (cedula.value.trim() === "") {
-//         check.value = "Debes ingresar tus datos"
-//     } else if (password.value.trim() === "") {
-//         check.value = "debes ingresar tus datos"
-//     } else if (cedula.value !== "123456") {
-//         check.value = "La informacion de los campos es incorrecta"
-//     } else if (password.value !== "123") {
-//         check.value = "La informacion de los campos es incorrecta"
-//     } else {
-//         check.value = ""
-//         Swal.fire({
-//             position: "center",
-//             icon: "success",
-//             title: "Bienvenido",
-//             showConfirmButton: false,
-//             timer: 3000,
-//         });
-//     }
-// }
 
 const images = [
     'https://i.pinimg.com/originals/50/68/82/506882c848b883117283acc5c101095a.png',

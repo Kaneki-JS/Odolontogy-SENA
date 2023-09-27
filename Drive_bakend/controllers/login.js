@@ -1,74 +1,80 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-//import PersonalClinico from '../models/personal_clinico.js';
-//import PersonalRutas from '../models/personalRutas.js';
-import Pacientes from '../models/pacientes.js';
-import personal_clinico from '../models/personal_clinico.js';
+import bcrypt from "bcryptjs";
+import axios from "axios";
+import jwt from "jsonwebtoken";
+import Pacientes from "../models/pacientes.js";
+import PersonasClinica from "../models/personal_clinico.js";
+import pacientes from "../models/pacientes.js";
 
 const httpLogin = {
-    iniciarSesion: async (req, res) => {
-        const { cedula, password } = req.body;
-    
-    // console.log(cedula,password);
-        try {
-            let user = null;
-            let userType = null;
-        // Verificar si el usuario es un Personal
-            user = await personalRutas.findOne({ cedula });
+  getLogin: async (req, res) => {
+    try {
+      const personasClinicaData = await PersonasClinica.find();
+
+      if (personasClinicaData) {
+        res
+          .status(200)
+          .json(`usuarios personal clinicico ${personasClinicaData}`);
+        console.log("correcto", personasClinicaData);
+      } else {
+        res.status(404).json({ error: "admins no encontrados f retirate" });
+      }
+    } catch (error) {
+      res.status(400).json({ error: "esto no sirve retirese imbecil" });
+      console.log("error", error);
+    }
+  },
+  postLogin: async (req, res) => {
+    const { cedula, password } = req.body;
+
+    try {
+        let user = null;
+        let userType = null;
+
+        // Verificar si el usuario es un PersonasClinica
+        user = await PersonasClinica.findOne({ cedula });
         if (user) {
-            userType = 'personal_clinico';
-        //   console.log("Inicia personal_clinico");
+            userType = "PersonasClinica";
+            console.log("Inicia PersonasClinica siuxd");
         } else {
-          // Verificar si el usuario es un personal_clinico de Rutas
-            user = await personalRutas.findOne({ cedula });
+            user = await pacientes.findOne({ cedula });
             if (user) {
-            userType = 'personalRutas';
-            console.log("Inicia personal_clinico de Rutas");
-        } else {
-            // Verificar si el usuario es un Pacientes
-                user = await Pacientes.findOne({ cedula });
-            if (user) {
-                userType = 'Pacientes';
+                userType = "Pacientes";
                 console.log("Inicia Pacientes");
             }
         }
-        }
+
         // Si no se encuentra ningún usuario con el cedula proporcionado, retornar error
         if (!user) {
-            return res.status(401).json({ msg: 'Credenciales inválidas usuario no encontrado' });
+            return res
+                .status(401)
+                .json({ msg: "Credenciales inválidas usuario no encontrado" });
         }
+
         // Verificar las credenciales del usuario en la base de datos
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ msg: 'Credenciales inválidas revisa la contraseña' });
+            return res
+                .status(401)
+                .json({ msg: "Credenciales inválidas" });
         }
-        // Si las credenciales son válidas, generar el token JWT usando la clave privada del archivo .env
-        const token = jwt.sign(
-            { userId: user._id, userType: userType },
-            process.env.SECRETORPRIVATEKEY,
-            { expiresIn: '1h' }
-        );
-            res.json({ msg: 'Inicio de sesión exitoso.', token });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ msg: 'Error en el servidor' });
-        }
+
+        // Registrar la solicitud de inicio de sesión
+       res.json({ msg: "Inicio de sesión exitoso" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Error en el servidor" });
     }
-}
+}}
 
-export default httpLogin
-
-
-
-
-
+export default httpLogin;
 
 // import LoginModel from "../models/login.js"
 
 // const httpLogin = {
 //     getLogins: async ( req, res ) => {
 //         try {
-//             const logins = await LoginModel.find({}) 
+//             const logins = await LoginModel.find({})
 //             res.json({ logins })
 //         } catch (error) {
 //             res.status(500).json({ mensaje: "Error al obtener los ", error })

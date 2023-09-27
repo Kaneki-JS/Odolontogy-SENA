@@ -12,27 +12,29 @@ const httpPersonal = {
         }
     },
 
-    postPersonal: async ( req, res ) => {
-        const { nombre, direccion, cedula, estado, telefono } = req.body;
-        const ProgramasFormacion = new PersonalModel({
+    postPersonal: async (req, res) => {
+        const { nombre, direccion, cedula, estado, telefono, password } = req.body;
+        const personal = new PersonalModel({
             nombre,
             direccion,
             cedula,
             estado, 
-            telefono
+            telefono,
+            password
         });
 
         try {
-            const nuevaProgramasFormacion = await ProgramasFormacion.save();
+            const nuevoPersonal = await personal.save();
 
             res.json({
-                mensaje: "Un personal insertada!!",
-                nuevaProgramasFormacion
+                mensaje: "Un personal insertado!!",
+                nuevoPersonal
             });
         } catch (error) {
-            res.status(500).json({ mensaje: "Error al insertar la formacion", error });
+            res.status(500).json({ mensaje: "Error al insertar el personal", error });
         }
     },
+
 
     putPersonal: async (req, res) => {
         const { cedula } = req.params; // Obtener cedula de los parámetros de la URL

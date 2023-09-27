@@ -1,4 +1,4 @@
-import CitasModel from "../models/Citas.js";
+import CitasModel from "../models/admin_citas.js";
 
 const httpAdminCitas = {
     confirmarCita: async (req, res) => {

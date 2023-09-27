@@ -31,6 +31,15 @@
             <q-item-section>Inicio </q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/personal">
+            <q-item-section avatar>
+              <q-icon name="person" />
+            </q-item-section>
+
+            <q-item-section> Personal</q-item-section>
+          </q-item>
+
+
           <q-item clickable v-ripple to="/usuarios">
             <q-item-section avatar>
               <q-icon name="people" />
@@ -47,12 +56,14 @@
             <q-item-section> Programas </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/ambientes">
+          <q-item clickable v-ripple to="/citasmet">
             <q-item-section avatar>
-              <q-icon name="dashboard" />
+              <q-icon
+                name="img:https://cdn-icons-png.flaticon.com/512/1060/1060915.png"
+              />
             </q-item-section>
 
-            <q-item-section> Ambientes </q-item-section>
+            <q-item-section> Programar citas </q-item-section>
           </q-item>
 
           <q-item clickable v-ripple to="/instrumentosEvaluacion">
@@ -114,7 +125,7 @@ const toggleLeftDrawer = () => {
 }
 
 #avatar {
-  height: 30px;
+  height: 50px;
   width: 60px;
   filter: invert(1);
 }
@@ -124,12 +135,12 @@ const toggleLeftDrawer = () => {
 }
 
 #lateral {
-  background-color: rgb(20, 101, 206);
+  background-color: rgba(83, 151, 240, 0.548);
   font-family: cursive;
 }
 
 #header {
-  background-color: rgb(20, 101, 206);
+  background-color: rgba(83, 154, 247, 0.623);
   font-family: cursive;
 }
 

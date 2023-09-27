@@ -1,11 +1,16 @@
 import express from "express"
 import mongoose from "mongoose"
 
-import personal from "../routes/personal_clinico.js";
+import admin from "../routes/admin_citas.js";
+import informes from "../routes/informes.js";
 import login from "../routes/login.js";
-import usuarios from "../routes/Usuarios.js";
 import pacientes from "../routes/pacientes.js";
-import rol from "../routes/rol.js"
+import personal from "../routes/personal_clinico.js";
+import progCitas from "../routes/prog_citas.js";
+import rol from "../routes/rol.js";
+import tratamientos from "../routes/tratamientos.js";
+import usuarios from "../routes/usuarios.js";
+
 
 
 
@@ -19,11 +24,17 @@ class Server {
     }
 
     routes() { 
-        this.app.use('/personal', personal);
-        this.app.use('/login', login) ;
-        this.app.use('/usuarios',usuarios );
+        this.app.use('/admin', admin);
+        this.app.use('/informes', informes)
+        this.app.use('/login', login);
         this.app.use("/pacientes", pacientes);
-        this.app.use('/rol', rol)
+        this.app.use('/personal', personal);
+        this.app.use('/citas', progCitas);
+        this.app.use('/rol', rol);
+        this.app.use('/tratamientos', tratamientos)
+        this.app.use('/usuarios',usuarios );
+        
+        
     }
 
     conectarDB() {

@@ -4,6 +4,7 @@ import httpLogin from '../controllers/login.js';
 const router = express.Router();
 
 // Ruta para iniciar sesión
-router.post('/iniciar-sesion', httpLogin.iniciarSesion);
+router.get('/',httpLogin.getLogin);
+router.post('/', httpLogin.postLogin);
 
 export default router;
