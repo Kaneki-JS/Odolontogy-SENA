@@ -1,12 +1,13 @@
 <template>
     <div class="q-pa-md">
         <div>
-            <q-table flat bordered grid title="Instrumentos de evaluacion" :rows="instrumento" :columns="columns"
-                row-key="name" :filter="filter" hide-header :loading="loading" virtual-scroll :virtual-scroll-item-size="20"
-                :virtual-scroll-sticky-size-start="20"  :rows-per-page-options="[0]">
+            <q-table flat bordered title="Usuarios" :rows="user" :columns="columns" row-key="id" :filter="filter"
+                :loading="loading" table-header-class="" virtual-scroll :virtual-scroll-item-size="20"
+                :virtual-scroll-sticky-size-start="20" :pagination="pagination" :rows-per-page-options="[0]"
+                @virtual-scroll="onScroll">
                 <template v-slot:top>
-                    <q-btn style="background-color: green;" :disable="loading" label="Agregar" @click="agregar()" />
-                    <div style="margin-left: 5%;" class="text-h4">Instrumentos de evaluacion</div>
+                    <q-btn style="background-color: rgb(25, 103, 204);" :disable="loading" label="Agregar" @click="agregar()" />
+                    <div style="margin-left: 5%;" class="text-h4">Pacientes</div>
                     <q-space />
                     <q-input borderless dense debounce="300"
                         style="border-radius: 10px; border:grey solid 0.5px; padding: 5px;" color="primary"
@@ -31,9 +32,10 @@
                         <q-btn class="q-mx-sm" color="red" outline @click="activar(props)" v-else>❌</q-btn>
                     </q-td>
                 </template>
-            </q-table>            
+
+            </q-table>
         </div>
-        <q-dialog v-model="nuevo">
+        <q-dialog v-model="alert">
             <q-card id="card">
                 <q-card-section>
                     <div class="text-h6">Registro</div>
@@ -44,16 +46,24 @@
                             <div class="q-gutter-md">
                                 <q-input v-model="nombre" label="Nombre" />
                             </div>
-                            <q-card-section>
-                                <q-input class="input" v-model="archivoOEnlace"
-                                    label="Documentos" outlined dense clearable prepend-icon="attach_file"
-                                    @clear="limpiarCampo">
+                            <div class="q-gutter-md">
+                                <q-input v-model="telefono" label="Telefono" />
+                            </div>
+                            <div class="q-gutter-md">
+                                <q-input v-model="cedula" label="Cedula" />
+                            </div>
+                            <div class="q-gutter-md">
+                                <q-input v-model="apellidos" label="Apellidos" />
+                            </div>
+                            <div class="q-gutter-md" v-if="bd === false">
+                                <q-input v-model="password" filled :type="isPwd ? 'password' : 'text'"
+                                    label="Ingresar password">
                                     <template v-slot:append>
-                                        <q-icon name="attach_file" style="cursor: pointer"
-                                            @click="abrirSelectorDeArchivos" />
+                                        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                                            @click="isPwd = !isPwd" />
                                     </template>
                                 </q-input>
-                            </q-card-section>
+                            </div>
                         </q-card-section>
                         <q-card-section>
                             <div role="alert"
@@ -79,141 +89,140 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-let nuevo = ref(false)
+import { usePacienteStore } from '../stores/pacientes.js';
+
+const usePaciente = usePacienteStore();
+
+
+let alert = ref(false)
 let bd = ref(false)
 let check = ref("")
 let isPwd = ref(true);
-let instrumento = ref([])
+let user = ref([])
 let nombre = ref("")
-let docuemento = ref("")
+let telefono = ref("")
+let cedula = ref("")
+let apellidos = ref("")
+let password = ref("")
+// let direccion = ref("")
 let loading = ref(false)
-let indice = ref("")
+let indice = ref(null)
 let r = ref("")
 
 let columns = [
     { name: 'nombre', align: 'center', label: 'Usuario', field: "nombre" },
-    { name: 'docuento', label: 'Docuentos', align: 'center', field: "documento" },
+    { name: 'telefono', label: 'Telefono', align: 'center', field: "telefono" },
     { name: 'estado', label: 'Estado', align: 'center', field: "estado" },
     { name: 'opciones', label: 'Opciones', align: 'center', field: "opciones" },
+    { name: 'cedula', label: 'Cedula', align: 'center', field: "cedula" },
+    { name: 'apellidos', label: 'Apellidos', align: 'center', field: "apellidos" },
 ]
+
 const filter = ref('')
+
 async function guardar() {
     loading.value = true
-    let r = await useInstumentos.addInstrumentosEvaluacion({
-        nombre: nombre.value,
-        docuemento: docuemento.value
-    })
-    console.log(r);
-    console.log("se guardo un nuevo usuario");
+    let res = await usePaciente.postPaciente({
+    nombre: nombre.value,
+    cedula: cedula.value,
+    apellidos: apellidos.vue,
+    telefono: telefono.value,
+    // direccion: direccion.value,
+    password: password.value
+})
+    console.log(res);
+    console.log("se guardo un nuevo programa");
     loading.value = false
-    listarinstrumentos()
-    limpiarFormulario()
+    listarPacientes()
+    // obtenerformacion()
+    // limpiarFormulario()
 }
+
+
 
 async function editarUser() {
     loading.value = true
     console.log("hola estoy editando");
-    let r = await useUsuario.editUsuarios(indice.value, {
-        nombre: nombre.value,
-    })
-    console.log(r);
-    bd.value = false
-    loading.value = false
-    console.log("limpiando datos");
-    listarinstrumentos()
-    limpiarFormulario()
+    try {
+        let r = await usePaciente.putPaciente(indice.value, {
+            nombre: nombre.value,
+            direccion: direccion.value,
+            telefono: telefono.value,
+            cedula: cedula.value,
+            apellidos: apellidos.value,
+            password: password.value
+        })
+        console.log(r);
+        bd.value = false
+        loading.value = false
+        console.log("limpiando datos");
+        await listarPacientes() // Espera a que listarDentistas termine antes de continuar
+        limpiarFormulario()
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 async function activar(props) {
-    r.value = props.row
-    if (r.value.estado === true) {
-        r.value.estado = false
-        console.log(r.value.estado, "resultado del if condicion");
-    } else {
-        r.value.estado = true
-        console.log(r.value.estado, "resultado del else condicion");
-    }
-    let est = await useUsuario.activarUsuarios(r.value._id)
-    console.log(est);
+  r.value = props.row
+  if (r.value.estado === true) {
+      r.value.estado = false
+      console.log(r.value.estado, "resultado del if condicion");
+  } else {
+      r.value.estado = true
+      console.log(r.value.estado, "resultado del else condicion");
+  }
+  try {
+      let est = await usePaciente.putPacienteEstado(r.value.id)
+      console.log(est);
+  } catch (error) {
+      console.error(error);
+  }
 }
-const cardStates = ref({});
-const isRotated = ref({});
-const toggleDetails = (index) => {
-    // Cambia el estado de la card en el índice específico
-    cardStates.value[index] = !cardStates.value[index];
-    isRotated.value[index] = !isRotated.value[index];
-};
-
-const abrirSelectorDeArchivos = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.style.display = "none";
-    fileInput.addEventListener("change", handleFileSelection);
-    document.body.appendChild(fileInput);
-    fileInput.click();
-};
-
-const handleFileSelection = (event) => {
-    const selectedFile = event.target.files[0];
-    const selectedFileName = selectedFile ? selectedFile.name : "";
-
-    // Asignar el nombre del archivo al campo archivoOEnlace
-    archivoOEnlace.value = selectedFileName;
-
-    // Buscar la opción que corresponde al nombre del archivo
-    const selectedOption = opciones.find((option) =>
-        option.includes(selectedFileName)
-    );
-
-    if (selectedOption) {
-        // Enviar el texto correspondiente a la opción seleccionada
-        const textoDeOpcion = selectedOption;
-        // Aquí puedes hacer lo que necesites con textoDeOpcion
-        alert(`Texto de la opción seleccionada: ${textoDeOpcion}`);
-    } else {
-        // Manejar el caso en que no se encuentre una opción correspondiente
-        alert(
-            "No se encontró una opción correspondiente al archivo seleccionado."
-        );
-    }
-
-    event.target.remove(); // Elimina el input de tipo file después de su uso
-};
-
 
 function edito(props) {
     bd.value = true
     r.value = props.row
-    nuevo.value = true
+    alert.value = true
     indice.value = r.value._id
     nombre.value = r.value.nombre
+    // direccion.value = r.value.direccion
+    telefono.value = r.value.telefono
+    cedula.value = r.value.cedula
+    password.value = r.value.password
+    apellidos.value = r.value.apellidos
 }
 
 function limpiarFormulario() {
     console.log("limpiar datos");
     nombre.value = ""
-    docuemento.value = ""
+    // direccion.value = ""
+    telefono.value = ""
+    cedula.value = ""
 }
 
-listarinstrumentos()
-async function listarinstrumentos() {
-    let instrumentos = await useInstumentos.getInstrumentosEvalacion()
-    console.log(instrumentos);
-    instrumento.value = instrumentos.data.InstrumentosEvaluacion
+async function listarPacientes() {
+    try {
+        let paciente = await usePaciente.getPacientes();
+        console.log(paciente);
+        user.value = paciente.pacientes; // Quité .data.Dentistas
+    } catch (error) {
+        console.error("Error al obtener los pacientes", error);
+    }
 }
 
 function agregar() {
-    nuevo.value = true
+    alert.value = true
 }
-onMounted(() => {
-    listarinstrumentos()
-    limpiarFormulario()
-})
 
+onMounted(() => {
+    listarPacientes();
+    limpiarFormulario();
+})
 </script>
+
 <style scoped>
 #card {
     width: 35em;
     max-width: 100%;
-}
-</style>
+}</style>

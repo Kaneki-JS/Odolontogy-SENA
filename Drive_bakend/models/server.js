@@ -1,7 +1,8 @@
 import express from "express"
 import mongoose from "mongoose"
 
-import admin from "../routes/admin_citas.js";
+
+import dentista from "../routes/dentistas.js";
 import informes from "../routes/informes.js";
 import login from "../routes/login.js";
 import pacientes from "../routes/pacientes.js";
@@ -24,7 +25,7 @@ class Server {
     }
 
     routes() { 
-        this.app.use('/admin', admin);
+        this.app.use('/dentista', dentista)
         this.app.use('/informes', informes)
         this.app.use('/login', login);
         this.app.use("/pacientes", pacientes);

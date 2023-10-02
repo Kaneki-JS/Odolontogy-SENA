@@ -59,7 +59,7 @@ const httpLogin = {
         }
 
         // Registrar la solicitud de inicio de sesión
-       res.json({ msg: "Inicio de sesión exitoso" });
+      res.json({ msg: "Inicio de sesión exitoso" });
 
     } catch (error) {
         console.error(error);

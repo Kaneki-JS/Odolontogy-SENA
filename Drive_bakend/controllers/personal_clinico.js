@@ -1,12 +1,11 @@
 import PersonalModel from "../models/personal_clinico.js"
-import bcryptjs from "bcryptjs"
 
 
 const httpPersonal = {
     getPersonal: async (req, res) => {
         try {
-            const ProgramasFormacion = await PersonalModel.find({});
-            res.json({ ProgramasFormacion });
+            const personal = await PersonalModel.find({});
+            res.json({ personal });
         } catch ( error ) {
             res.status(500).json({ mensaje: "Error al obtener las formaciones", error })
         }
@@ -64,31 +63,26 @@ const httpPersonal = {
     
     
 
-    putPersonalEstado: async ( req, res ) => {
-        const { cedula } = req.params;
-
+    putPersonalEstado: async (req, res) => {
         try {
-            
-            const ProgramasFormacion = await PersonalModel.findOne({cedula});
-
-            if ( !ProgramasFormacion ) {
-                return res.status(400).json({ mensaje: "Formacion no encontrada" });
-            }
-
-            ProgramasFormacion.estado = !ProgramasFormacion.estado
-
-            await ProgramasFormacion.save();
-
-            const estadoMensaje = ProgramasFormacion.estado ? "Activo" : "Inactivo";
-
-            res.json({
-                mensaje: `Estado de la formacion modificada a  ${ estadoMensaje }`,
-                ProgramasFormacion
-            });
+          const { id } = req.params  
+          const {estado}=req.body
+          const per = await PersonalModel.findById({_id:id})
+          console.log(per);
+          if(per){
+            console.log(per);
+            per.estado=estado
+          }
+    
+          res.json({
+              msj: "fue cambiado el estado",
+              per,
+          }) 
         } catch (error) {
-            res.status(500).json({ mensaje: "Error l cambiar el estado de la formacion", error })
+          console.log(error);
         }
-    }
+    
+      }
 }
 
 export default httpPersonal

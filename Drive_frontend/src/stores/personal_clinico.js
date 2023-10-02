@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 import axios from 'axios';
 import { urlBackend } from '../routes/direccion.js';
 
-export const usePersonalClinicoStore = defineStore('personalClinico', () => {
-    const getPersonalClinico = async () => {
+export const usePersonalStore = defineStore('personalClinico', () => {
+    const getPersonal = async () => {
         try {
             let res = await axios.get(`${urlBackend}/personal`);
             return res.data;
@@ -13,7 +13,7 @@ export const usePersonalClinicoStore = defineStore('personalClinico', () => {
         }
     }
 
-    const postPersonalClinico = async (info) => {
+    const postPersonal = async (info) => {
         try {
             let res = await axios.post(`${urlBackend}/personal`, info);
             return res.data;
@@ -23,7 +23,7 @@ export const usePersonalClinicoStore = defineStore('personalClinico', () => {
         }
     }
 
-    const putPersonalClinico = async (cedula, info) => {
+    const putPersonal = async (cedula, info) => {
         try {
             let res = await axios.put(`${urlBackend}/personal/${cedula}`, info);
             return res.data;
@@ -33,20 +33,30 @@ export const usePersonalClinicoStore = defineStore('personalClinico', () => {
         }
     }
 
-    const cambiarEstadoPersonalClinico = async (cedula) => {
+    const putPersonalEstado = async (id) =>{
         try {
-            let res = await axios.put(`${urlBackend}/personal/estado/${cedula}`);
+            let res = await axios.put(`${urlBackend}/personal/estado/${id}`,);
             return res.data;
         } catch (error) {
-            console.error("Error al cambiar el estado de un miembro del personal clínico", error);
-            return error;
+            console.error("Error al actualizar los datos", error);
         }
     }
 
+    // const putDentistaEstado = async (id, estado) => {
+    //     try {
+    //         let res = await axios.put(`${urlBackend}/dentista/estado/${id}`,{
+    //             estado:estado
+    //         });
+    //         return res.data;
+    //     } catch (error) {
+    //         console.error("Error al actualizar los datos", error);
+    //     }
+    // }
+
     return {
-        getPersonalClinico,
-        postPersonalClinico,
-        putPersonalClinico,
-        cambiarEstadoPersonalClinico
+        getPersonal,
+        postPersonal,
+        putPersonal,
+        putPersonalEstado
     }
 });

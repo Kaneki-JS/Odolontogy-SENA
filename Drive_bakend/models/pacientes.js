@@ -5,7 +5,6 @@ const pacienteSchema = new mongoose.Schema({
     apellidos: { type: String, required: false },
     cedula: { type: Number, required: false, unique: true },
     telefono: { type: Number, required: false, unique: true },
-    email: { type: String, required: false, unique: true },
     estado: { type: Boolean, default: true },
     password: { type: String, required: false, unique: true }
 })

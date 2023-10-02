@@ -55,7 +55,30 @@ const httpPacientes = {
         } catch (error) {
             res.status(500).json({ mensaje: "Error al actualizar el paciente", error });
         }
+    },
+
+    putPacienteEstado: async (req, res) => {
+        try {
+            const { id } = req.params  
+            const {estado}=req.body
+            const pac = await PacientesModel.findById({_id:id})
+            console.log(pac);
+            if(pac){
+            console.log(pac);
+            pac.estado=estado
+            }
+
+            res.json({
+                msj: "fue cambiado el estado",
+                pac,
+            }) 
+        } catch (error) {
+            console.log(error);
+        }
+
     }
 };
+
+
 
 export default httpPacientes;

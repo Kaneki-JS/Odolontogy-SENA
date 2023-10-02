@@ -33,7 +33,9 @@
 
           <q-item clickable v-ripple to="/personal">
             <q-item-section avatar>
-              <q-icon name="person" />
+              <q-icon 
+              name="img:https://denteractive.com/wp-content/themes/Dentists/assets/img/dentist/dentist.png"
+              />
             </q-item-section>
 
             <q-item-section> Personal</q-item-section>
@@ -48,14 +50,6 @@
             <q-item-section> Usuarios</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/programas">
-            <q-item-section avatar>
-              <q-icon name="book" />
-            </q-item-section>
-
-            <q-item-section> Programas </q-item-section>
-          </q-item>
-
           <q-item clickable v-ripple to="/citasmet">
             <q-item-section avatar>
               <q-icon
@@ -66,15 +60,25 @@
             <q-item-section> Programar citas </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/instrumentosEvaluacion">
+          <q-item clickable v-ripple to="/dentista">
             <q-item-section avatar>
-              <q-icon name="quiz" />
+              <q-icon
+              name="img:https://static.vecteezy.com/system/resources/previews/018/245/406/original/icon-with-dentist-s-tools-and-a-blue-shield-png.png"
+              />
             </q-item-section>
 
-            <q-item-section> Instrumentos de Evaluacion </q-item-section>
+            <q-item-section> Dentistas </q-item-section>
           </q-item>
 
-          <q-separator />
+          <q-item clickable v-ripple to="/pacientes">
+            <q-item-section avatar>
+              <q-icon
+              name="img:https://png.pngtree.com/png-clipart/20220116/original/pngtree-dentists-and-dental-patients-png-image_7110303.png"
+              />
+            </q-item-section>
+
+            <q-item-section> Pacientes </q-item-section>
+          </q-item>
 
           <q-item clickable v-ripple to="/">
             <q-item-section avatar>

@@ -11,4 +11,6 @@ router.post( "/", [
 
 router.put( "/:cedula", httpPacientes.putPaciente )
 
+router.put("/estado/:id", httpPacientes.putPacienteEstado)
+
 export default router

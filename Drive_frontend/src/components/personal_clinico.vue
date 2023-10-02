@@ -1,321 +1,254 @@
 <template>
   <div class="q-pa-md">
-    <q-table
-      flat bordered
-      title="Treats"
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      :filter="filter"
-      :loading="loading"
-    >
+      <div>
+          <q-table flat bordered title="Usuarios" :rows="user" :columns="columns" row-key="id" :filter="filter"
+              :loading="loading" table-header-class="" virtual-scroll :virtual-scroll-item-size="20"
+              :virtual-scroll-sticky-size-start="20" :pagination="pagination" :rows-per-page-options="[0]"
+              @virtual-scroll="onScroll">
+              <template v-slot:top>
+                  <q-btn style="background-color: rgb(25, 103, 204);" :disable="loading" label="Agregar" @click="agregar()" />
+                  <div style="margin-left: 5%;" class="text-h4">Personal Clinico</div>
+                  <q-space />
+                  <q-input borderless dense debounce="300"
+                      style="border-radius: 10px; border:grey solid 0.5px; padding: 5px;" color="primary"
+                      v-model="filter">
+                      <template v-slot:append>
+                          <q-icon name="search" />
+                      </template>
+                  </q-input>
+              </template>
+              <template v-slot:body-cell-estado="props">
+                  <q-td :props="props">
+                      <span class="text-green" v-if="props.row.estado == true">Activo</span>
+                      <span class="text-red" v-else>Inactivo</span>
+                  </q-td>
+              </template>
+              <template v-slot:body-cell-opciones="props">
+                  <q-td :props="props">
+                      <q-spinner-ios v-if="loading == true" color="green" size="2em" :thickness="10" />
+                      <q-btn v-else class="q-mx-sm" color="primary" outline @click="edito(props)">📝</q-btn>
+                      <q-btn class="q-mx-sm" color="green" outline @click="activar(props)"
+                          v-if="props.row.estado == false">✅</q-btn>
+                      <q-btn class="q-mx-sm" color="red" outline @click="activar(props)" v-else>❌</q-btn>
+                  </q-td>
+              </template>
 
-      <template v-slot:top>
-        <q-btn color="primary" :disable="loading" label="Add row" @click="addRow" />
-        <q-btn v-if="rows.length !== 0" class="q-ml-sm" color="primary" :disable="loading" label="Remove row" @click="removeRow" />
-        <q-space />
-        <q-input borderless dense debounce="300" color="primary" v-model="filter">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
+          </q-table>
+      </div>
+      <q-dialog v-model="alert">
+          <q-card id="card">
+              <q-card-section>
+                  <div class="text-h6">Registro</div>
+              </q-card-section>
+              <q-card-section class="q-pt-none" id="card">
+                  <q-card flat bordered class="my-card">
+                      <q-card-section class="q-pa-md">
+                          <div class="q-gutter-md">
+                              <q-input v-model="nombre" label="Nombre" />
+                          </div>
+                          <div class="q-gutter-md">
+                              <q-input type="email" v-model="experiencia" label="Experiencia" />
+                          </div>
+                          <div class="q-gutter-md">
+                              <q-input v-model="telefono" label="Telefono" />
+                          </div>
+                          <div class="q-gutter-md">
+                              <q-input v-model="cedula" label="Cedula" />
+                          </div>
+                          <div class="q-gutter-md">
+                              <q-input v-model="especialidad" label="Especialidad" />
+                          </div>
+                          <div class="q-gutter-md">
+                              <q-input v-model="direccion" label="Direccion" />
+                          </div>
+                          <div class="q-gutter-md" v-if="bd === false">
+                              <q-input v-model="password" filled :type="isPwd ? 'password' : 'text'"
+                                  label="Ingresar password">
+                                  <template v-slot:append>
+                                      <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                                          @click="isPwd = !isPwd" />
+                                  </template>
+                              </q-input>
+                          </div>
+                      </q-card-section>
+                      <q-card-section>
+                          <div role="alert"
+                              style="border: 2px solid red; border-radius: 20px; text-align: center; background-color: rgba(255, 0, 0, 0.304);"
+                              v-if="check !== ''">
+                              <div>
+                                  {{ check }}
+                              </div>
+                          </div>
+                      </q-card-section>
+                  </q-card>
+              </q-card-section>
 
-    </q-table>
+              <q-card-actions align="right">
+                  <q-btn flat label="Cerrar" @click="limpiarFormulario()" color="primary" v-close-popup />
+                  <q-btn flat label="Guardar" v-if="bd === false" @click="guardar()" color="primary" v-close-popup />
+                  <q-btn flat label="Editar Usuario" v-else @click="editarUser()" color="primary" v-close-popup />
+              </q-card-actions>
+          </q-card>
+      </q-dialog>
   </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { usePersonalStore } from '../stores/personal_clinico.js';
 
-const columns = [
-  {
-    name: 'name',
-    required: true,
-    label: 'Dessert (100g serving)',
-    align: 'left',
-    field: row => row.name,
-    format: val => `${val}`,
-    sortable: true
-  },
-  { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
-  { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-  { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
-  { name: 'protein', label: 'Protein (g)', field: 'protein' },
-  { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
-  { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-  { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
+const usePersonal = usePersonalStore();
+
+
+let alert = ref(false)
+let bd = ref(false)
+let check = ref("")
+let isPwd = ref(true);
+let user = ref([])
+let nombre = ref("")
+let telefono = ref("")
+let cedula = ref("")
+let direccion = ref("")
+let password =ref("")
+let loading = ref(false)
+let indice = ref(null)
+let r = ref("")
+
+let columns = [
+  { name: 'nombre', align: 'center', label: 'Usuario', field: "nombre" },
+  { name: 'telefono', label: 'Telefono', align: 'center', field: "telefono" },
+  { name: 'estado', label: 'Estado', align: 'center', field: "estado" },
+  { name: 'opciones', label: 'Opciones', align: 'center', field: "opciones" },
+  { name: 'direccion', label: 'Direccion', align: 'center', field: "direccion" },
+//   { name: 'password', label: 'Password', align: 'center', field: "password" }
 ]
 
-const originalRows = [
-  {
-    name: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6.0,
-    carbs: 24,
-    protein: 4.0,
-    sodium: 87,
-    calcium: '14%',
-    iron: '1%'
-  },
-  {
-    name: 'Ice cream sandwich',
-    calories: 237,
-    fat: 9.0,
-    carbs: 37,
-    protein: 4.3,
-    sodium: 129,
-    calcium: '8%',
-    iron: '1%'
-  },
-  {
-    name: 'Eclair',
-    calories: 262,
-    fat: 16.0,
-    carbs: 23,
-    protein: 6.0,
-    sodium: 337,
-    calcium: '6%',
-    iron: '7%'
-  },
-  {
-    name: 'Cupcake',
-    calories: 305,
-    fat: 3.7,
-    carbs: 67,
-    protein: 4.3,
-    sodium: 413,
-    calcium: '3%',
-    iron: '8%'
-  },
-  {
-    name: 'Gingerbread',
-    calories: 356,
-    fat: 16.0,
-    carbs: 49,
-    protein: 3.9,
-    sodium: 327,
-    calcium: '7%',
-    iron: '16%'
-  },
-  {
-    name: 'Jelly bean',
-    calories: 375,
-    fat: 0.0,
-    carbs: 94,
-    protein: 0.0,
-    sodium: 50,
-    calcium: '0%',
-    iron: '0%'
-  },
-  {
-    name: 'Lollipop',
-    calories: 392,
-    fat: 0.2,
-    carbs: 98,
-    protein: 0,
-    sodium: 38,
-    calcium: '0%',
-    iron: '2%'
-  },
-  {
-    name: 'Honeycomb',
-    calories: 408,
-    fat: 3.2,
-    carbs: 87,
-    protein: 6.5,
-    sodium: 562,
-    calcium: '0%',
-    iron: '45%'
-  },
-  {
-    name: 'Donut',
-    calories: 452,
-    fat: 25.0,
-    carbs: 51,
-    protein: 4.9,
-    sodium: 326,
-    calcium: '2%',
-    iron: '22%'
-  },
-  {
-    name: 'KitKat',
-    calories: 518,
-    fat: 26.0,
-    carbs: 65,
-    protein: 7,
-    sodium: 54,
-    calcium: '12%',
-    iron: '6%'
-  }
-]
+const filter = ref('')
 
-export default {
-  setup () {
-    const loading = ref(false)
-    const filter = ref('')
-    const rowCount = ref(10)
-    const rows = ref([...originalRows])
+async function guardar() {
+  loading.value = true
+  let res = await usePersonal.postPersonal({
+  nombre: nombre.value,
+  cedula: cedula.value,
+  telefono: telefono.value,
+  direccion: direccion.value,
+  password: password.value
+})
+  console.log(res);
+  console.log("se guardo un nuevo miembro del personal");
+  loading.value = false
+  listarPersonal()
+  // obtenerformacion()
+  // limpiarFormulario()
+}
 
-    return {
-      columns,
-      rows,
 
-      loading,
-      filter,
-      rowCount,
 
-      // emulate fetching data from server
-      addRow () {
-        loading.value = true
-        setTimeout(() => {
-          const
-            index = Math.floor(Math.random() * (rows.value.length + 1)),
-            row = originalRows[ Math.floor(Math.random() * originalRows.length) ]
-
-          if (rows.value.length === 0) {
-            rowCount.value = 0
-          }
-
-          row.id = ++rowCount.value
-          const newRow = { ...row } // extend({}, row, { name: `${row.name} (${row.__count})` })
-          rows.value = [ ...rows.value.slice(0, index), newRow, ...rows.value.slice(index) ]
-          loading.value = false
-        }, 500)
-      },
-
-      removeRow () {
-        loading.value = true
-        setTimeout(() => {
-          const index = Math.floor(Math.random() * rows.value.length)
-          rows.value = [ ...rows.value.slice(0, index), ...rows.value.slice(index + 1) ]
-          loading.value = false
-        }, 500)
-      }
-    }
+async function editarUser() {
+  loading.value = true
+  console.log("hola estoy editando");
+  try {
+      let r = await usePersonal.putPersonal(indice.value, {
+          nombre: nombre.value,
+          direccion: direccion.value,
+          telefono: telefono.value,
+          cedula: cedula.value,
+      })
+      console.log(r);
+      bd.value = false
+      loading.value = false
+      console.log("limpiando datos");
+      await listarDentistas() // Espera a que listarDentistas termine antes de continuar
+      limpiarFormulario()
+  } catch (error) {
+      console.error(error);
   }
 }
+
+
+async function activar(props) {
+  r.value = props.row
+  if (r.value.estado === true) {
+      r.value.estado = false
+      console.log(r.value.estado, "resultado del if condicion");
+  } else {
+      r.value.estado = true
+      console.log(r.value.estado, "resultado del else condicion");
+  }
+  try {
+      let est = await usePersonal.putPersonalEstado(r.value.id)
+      console.log(est);
+  } catch (error) {
+      console.error(error);
+  }
+}
+
+
+// async function activar(estado, personal) {
+//   personal.value = personal._id;
+//   try {
+//     const personalActuali = await usePersonal.putPersonalEstado(personal.value, estado);
+//     await listarPersonal();
+//   } catch (error) {
+//     console.error("Error al cambiar el estado del personal clínico", error);
+//   }
+// }
+
+
+// async function activar(estado, personal) {
+//   personal.value = personal._id;
+//   if (estado == true) {
+//   const personalActuali = await usePersonalStore.actuestado(personal.value, false);
+//   await traeproductos();
+// } else {
+//   const personalActuali = await usePersonalStore.actuestado(personal.value, true);
+//   await traeproductos();
+//   }
+// }
+
+function edito(props) {
+  bd.value = true
+  r.value = props.row
+  alert.value = true
+  indice.value = r.value._id
+  nombre.value = r.value.nombre
+  direccion.value = r.value.direccion
+  telefono.value = r.value.telefono
+  cedula.value = r.value.cedula
+  password.value = r.value.password
+}
+
+function limpiarFormulario() {
+  console.log("limpiar datos");
+  nombre.value = ""
+  direccion.value = ""
+  telefono.value = ""
+  cedula.value = ""
+  password.value = ""
+}
+
+async function listarPersonal() {
+  try {
+      let personal = await usePersonal.getPersonal();
+      console.log(personal);
+      user.value = personal.personal; // Quité .data.Dentistas
+  } catch (error) {
+      console.error("Error al obtener el personal", error);
+  }
+}
+
+function agregar() {
+  alert.value = true
+}
+
+onMounted(() => {
+  listarPersonal();
+  limpiarFormulario();
+})
 </script>
 
-
-
-
-
-
-
-
-<!-- <template>
-  <div class="q-pa-md">
-    <q-markup-table>
-      <thead>
-        <tr>
-          <th class="text-left">Dessert (100g serving)</th>
-          <th class="text-right">Calories</th>
-          <th class="text-right">Fat (g)</th>
-          <th class="text-right">Carbs (g)</th>
-          <th class="text-right">Protein (g)</th>
-          <th class="text-right">Sodium (mg)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="text-left">Frozen Yogurt</td>
-          <td class="text-right">159</td>
-          <td class="text-right">6</td>
-          <td class="text-right">24</td>
-          <td class="text-right">4</td>
-          <td class="text-right">87</td>
-        </tr>
-        <tr>
-          <td class="text-left">Ice cream sandwich</td>
-          <td class="text-right">237</td>
-          <td class="text-right">9</td>
-          <td class="text-right">37</td>
-          <td class="text-right">4.3</td>
-          <td class="text-right">129</td>
-        </tr>
-        <tr>
-          <td class="text-left">Eclair</td>
-          <td class="text-right">262</td>
-          <td class="text-right">16</td>
-          <td class="text-right">23</td>
-          <td class="text-right">6</td>
-          <td class="text-right">337</td>
-        </tr>
-        <tr>
-          <td class="text-left">Cupcake</td>
-          <td class="text-right">305</td>
-          <td class="text-right">3.7</td>
-          <td class="text-right">67</td>
-          <td class="text-right">4.3</td>
-          <td class="text-right">413</td>
-        </tr>
-        <tr>
-          <td class="text-left">Gingerbread</td>
-          <td class="text-right">356</td>
-          <td class="text-right">16</td>
-          <td class="text-right">49</td>
-          <td class="text-right">3.9</td>
-          <td class="text-right">327</td>
-        </tr>
-      </tbody>
-    </q-markup-table>
-    <div>
-      <button @click="obtenerPersonalClinico">Obtener Personal </button>
-      <button @click="crearMiembroPersonalClinico">Crear Miembro</button>
-      <button @click="actualizarMiembroPersonalClinico">editar</button>
-      <button @click="cambiarEstadoMiembroPersonalClinico">Estado</button>
-    </div>
-  </div>
-    
-  </template>
-  
-  <script>
-  import { usePersonalClinicoStore } from '../stores/personal_clinico';
-  
-  export default {
-    methods: {
-      obtenerPersonalClinico() {
-        const store = usePersonalClinicoStore();
-        store.getPersonalClinico().then(response => {
-          console.log('Personal Clínico obtenido:', response);
-        }).catch(error => {
-          console.error('Error al obtener el Personal Clínico:', error);
-        });
-      },
-      crearMiembroPersonalClinico() {
-        const store = usePersonalClinicoStore();
-        const info = {
-          // Información para crear un nuevo miembro del personal clínico
-        };
-        store.postPersonalClinico(info).then(response => {
-          console.log('Miembro de Personal Clínico creado:', response);
-        }).catch(error => {
-          console.error('Error al crear un miembro del Personal Clínico:', error);
-        });
-      },
-      actualizarMiembroPersonalClinico() {
-        const store = usePersonalClinicoStore();
-        const cedula = 'cedula_del_personal'; // Reemplaza con la cédula real
-        const info = {
-          // Información para actualizar el miembro del personal clínico
-        };
-        store.putPersonalClinico(cedula, info).then(response => {
-          console.log('Miembro de Personal Clínico actualizado:', response);
-        }).catch(error => {
-          console.error('Error al actualizar un miembro del Personal Clínico:', error);
-        });
-      },
-      cambiarEstadoMiembroPersonalClinico() {
-        const store = usePersonalClinicoStore();
-        const cedula = 'cedula_del_personal'; // Reemplaza con la cédula real
-        store.cambiarEstadoPersonalClinico(cedula).then(response => {
-          console.log('Estado del miembro de Personal Clínico cambiado:', response);
-        }).catch(error => {
-          console.error('Error al cambiar el estado del Personal Clínico:', error);
-        });
-      }
-    }
-  }
-  </script>
-   -->
+<style scoped>
+#card {
+  width: 35em;
+  max-width: 100%;
+}</style>
